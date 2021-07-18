@@ -1,0 +1,14 @@
+.container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.listContainer {
+    flex: 1;
+}
+
+.sendMessageContainer {
+    padding: 1rem;
+    display: flex;
+}

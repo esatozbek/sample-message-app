@@ -1,0 +1,8 @@
+.container {
+    height: 40rem;
+    width: 40rem;
+    background-color: green;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+}
