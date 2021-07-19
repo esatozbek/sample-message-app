@@ -1,3 +1,15 @@
 .container {
-    background-color: red;
+    background-color: #51bbfe;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.container:hover {
+    background-color: #34b1fe;
+}
+
+.container:active {
+    background-color: #0ba1fe;
 }

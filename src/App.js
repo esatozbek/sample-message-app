@@ -9,6 +9,7 @@ function App() {
                 justifyContent: 'center',
                 height: '100vh',
                 width: '100vw',
+                backgroundColor: '#efeffe',
             }}
         >
             <MainPage />

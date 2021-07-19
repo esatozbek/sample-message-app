@@ -1,0 +1,27 @@
+.container {
+    padding: 1rem;
+    display: block;
+    background-color: #a1e8cc;
+    margin: 1rem;
+    align-self: flex-start;
+    border-radius: 8px;
+}
+
+.me {
+    align-self: flex-end;
+}
+
+.content {
+    width: 10rem;
+    padding-bottom: 10px;
+}
+
+.date {
+    font-size: 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.me .date {
+    justify-content: flex-start;
+}

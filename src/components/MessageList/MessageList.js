@@ -9,8 +9,8 @@ function MessageList() {
             <div className={styles.listContainer}>
                 {Array(10)
                     .fill(0)
-                    .map(() => (
-                        <MessageListItem />
+                    .map((_, i) => (
+                        <MessageListItem me={i % 2 === 0} content={`content ${i}`} />
                     ))}
             </div>
             <div className={styles.sendMessageContainer}>
