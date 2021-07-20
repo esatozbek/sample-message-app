@@ -15,13 +15,3 @@
     width: 10rem;
     padding-bottom: 10px;
 }
-
-.date {
-    font-size: 12px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.me .date {
-    justify-content: flex-start;
-}
