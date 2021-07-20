@@ -1,7 +1,11 @@
 import styles from './Button.module.css';
 
-function Button() {
-    return <button className={styles.container}>Button</button>;
+function Button({ text, onClick }) {
+    return (
+        <button onClick={onClick} className={styles.container}>
+            {text}
+        </button>
+    );
 }
 
 export default Button;

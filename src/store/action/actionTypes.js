@@ -1,0 +1,2 @@
+export const SELECT_FRIEND = 'SELECT_FRIEND';
+export const SEND_MESSAGE = 'SEND_MESSAGE';
