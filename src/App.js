@@ -1,14 +1,13 @@
-import { Provider } from 'react-redux';
-import store from './store/index';
-import MainPage from './pages/MainPage/MainPage';
+import { useSelector } from 'react-redux';
+import { PAGES } from './constants';
 import styles from './App.module.css';
 
 function App() {
+    const { location } = useSelector((state) => state.location);
+    const Page = PAGES[location];
     return (
         <div className={styles.container}>
-            <Provider store={store}>
-                <MainPage />
-            </Provider>
+            <Page />
         </div>
     );
 }

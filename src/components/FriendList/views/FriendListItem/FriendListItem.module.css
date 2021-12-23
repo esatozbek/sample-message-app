@@ -1,9 +1,11 @@
 .container {
     padding: 1rem;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #c5decd;
+    color: #c5decd;
     cursor: pointer;
 }
 
 .container:hover {
     background-color: #c5decd;
+    color: black;
 }

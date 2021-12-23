@@ -2,23 +2,24 @@ import { SELECT_FRIEND, SEND_MESSAGE } from '../action/actionTypes';
 
 const defaultState = {
     byId: {
-        1: {
-            id: 1,
+        'General': {
+            name: 'General',
+            messages: [],
+        },
+        'Friend 1': {
             name: 'Friend 1',
             messages: ['message1', 'message2', 'message3'],
         },
-        2: {
-            id: 2,
+        'Friend 2': {
             name: 'Friend 2',
             messages: ['message4', 'message5', 'message6'],
         },
-        3: {
-            id: 3,
+        'Friend 3': {
             name: 'Friend 3',
             messages: ['message7', 'message8', 'message9'],
         },
     },
-    friendList: [1, 2, 3],
+    friendList: ['General', 'Friend 1', 'Friend 2', 'Friend 3'],
     selectedFriend: -1,
 };
 

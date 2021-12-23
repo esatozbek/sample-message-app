@@ -1,11 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import MessageListItem from './views/MessageListItem/MessageListItem';
 import Button from '../../components/Button/Button';
 import TextInput from '../TextInput/TextInput';
 import { sendMessage } from '../../store/action/messageActions';
 import { USER_ID, BLANK_USER_ID } from '../../constants';
+import socket from '../../socket';
 import styles from './MessageList.module.css';
+
+function NotificationListItem({content}) {
+    return <div>{content}</div>;
+}
 
 function MessageList() {
     const [message, setMessage] = useState('');
@@ -19,9 +24,17 @@ function MessageList() {
         if (message === '') {
             return;
         }
-        dispatch(sendMessage(USER_ID, selectedFriend, message));
+        socket.emit('sendMessage', JSON.stringify(sendMessage(USER_ID, selectedFriend, message)));
         setMessage('');
-    }, [dispatch, selectedFriend, message, setMessage]);
+    }, [selectedFriend, message, setMessage]);
+
+    useEffect(() => {
+        socket.on('receiveMessage', (evt) => {
+            console.log(evt);
+            const event = JSON.parse(evt);
+            dispatch(event);
+        });
+    }, [dispatch]);
 
     if (selectedFriend === BLANK_USER_ID) {
         return <div className={styles.container}>Select a friend from left side</div>;
@@ -33,13 +46,17 @@ function MessageList() {
                 {friendsById[selectedFriend] &&
                     friendsById[selectedFriend].messages
                         .map((messageId) => messagesById[messageId])
-                        .map((message) => (
-                            <MessageListItem
-                                key={message.id}
-                                me={message.senderId === USER_ID}
-                                content={message.content}
-                            />
-                        ))}
+                        .map((message) =>
+                            message.type === 'MESSAGE' ? (
+                                <MessageListItem
+                                    key={message.id}
+                                    me={message.senderId === USER_ID}
+                                    content={message.content}
+                                />
+                            ) : (
+                                <NotificationListItem key={message.id} content={message.content} />
+                            )
+                        )}
             </div>
             <div className={styles.sendMessageContainer}>
                 <TextInput value={message} onChange={onMessageChange} />
