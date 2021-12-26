@@ -2,7 +2,7 @@ import { SELECT_FRIEND, SEND_MESSAGE } from '../action/actionTypes';
 
 const defaultState = {
     byId: {
-        'General': {
+        General: {
             name: 'General',
             messages: [],
         },
@@ -35,11 +35,11 @@ function friendsReducer(state = defaultState, action) {
                 ...state,
                 byId: {
                     ...state.byId,
-                    [action.payload.receiverId]: {
-                        ...state.byId[action.payload.receiverId],
+                    [action.payload.receiver]: {
+                        ...state.byId[action.payload.receiver],
                         messages: [
                             action.payload.id,
-                            ...state.byId[action.payload.receiverId].messages,
+                            ...state.byId[action.payload.receiver].messages,
                         ],
                     },
                 },

@@ -1,5 +1,14 @@
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3001');
+let instance;
 
-export default socket;
+function initSocket() {
+    console.log('socket init')
+    if (!instance) {
+        instance = io('http://localhost:3001');
+    }
+
+    return instance;
+}
+
+export default initSocket;

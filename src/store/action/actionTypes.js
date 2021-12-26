@@ -1,3 +1,4 @@
 export const SELECT_FRIEND = 'SELECT_FRIEND';
 export const SEND_MESSAGE = 'SEND_MESSAGE';
 export const LOCATE_MAIN_SCREEN = 'LOCATE_MAIN_SCREEN';
+export const SET_NICKNAME = 'SET_NICKNAME';

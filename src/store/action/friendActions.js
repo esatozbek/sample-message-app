@@ -1,8 +1,8 @@
 import { SELECT_FRIEND } from './actionTypes';
 
-export function selectFriend(friendId) {
+export function selectFriend(friendName) {
     return {
         type: SELECT_FRIEND,
-        payload: friendId,
+        payload: friendName,
     };
 }
