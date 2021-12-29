@@ -3,9 +3,9 @@ import { io } from 'socket.io-client';
 let instance;
 
 function initSocket() {
-    console.log('socket init')
+    console.log('socket init');
     if (!instance) {
-        instance = io('http://localhost:3001');
+        instance = io('http://localhost:3002');
     }
 
     return instance;

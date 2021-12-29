@@ -2,7 +2,12 @@ import { useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import initSocket from '../../socket';
 import FriendListItem from './views/FriendListItem/FriendListItem';
-import { selectFriend } from '../../store/action/friendActions';
+import {
+    selectFriend,
+    addFriend,
+    setFriends,
+    markOnlineFriend,
+} from '../../store/action/friendActions';
 import { sendMessage } from '../../store/action/messageActions';
 import styles from './FriendList.module.css';
 
@@ -17,19 +22,40 @@ function FriendList() {
             dispatch(event);
         });
 
-        socket.on('newUserConnected', (msg) => {
-            console.log('newUserConnected', msg);
-            dispatch(sendMessage(null, 'General', msg, 'NOTIFICATION'));
+        socket.on('newUserConnected', (nick) => {
+            dispatch(sendMessage(null, 'General', `${nick} has joined the chat!`, 'NOTIFICATION'));
+            dispatch(addFriend(nick));
         });
 
-        socket.on('userDisconnect', (msg) => {
-            dispatch(sendMessage(null, 'General', msg, 'NOTIFICATION'));
+        socket.on('onlineUser', (nick) => {
+            dispatch(markOnlineFriend({ nick, status: 'ONLINE' }));
+        });
+
+        socket.on('userDisconnect', (nick) => {
+            dispatch(markOnlineFriend({ nick, status: 'OFFLINE' }));
+            dispatch(
+                sendMessage(
+                    null,
+                    'General',
+                    `${nick} has disconnected from the chat!`,
+                    'NOTIFICATION'
+                )
+            );
+        });
+
+        socket.on('friendList', (friendListJSON) => {
+            console.log(friendListJSON);
+            const friendList = JSON.parse(friendListJSON);
+            dispatch(setFriends(friendList));
         });
     }, [dispatch, socket]);
 
-    const onSelectFriend = useCallback((friendName) => {
-        socket.emit('selectFriend', JSON.stringify(selectFriend(friendName)));
-    }, [socket]);
+    const onSelectFriend = useCallback(
+        (friendName) => {
+            dispatch(selectFriend(friendName));
+        },
+        [dispatch]
+    );
 
     return (
         <div className={styles.container}>
@@ -39,6 +65,7 @@ function FriendList() {
                     <FriendListItem
                         key={friend.name}
                         name={friend.name}
+                        status={friend.status}
                         onClick={() => onSelectFriend(friend.name)}
                     />
                 ))}

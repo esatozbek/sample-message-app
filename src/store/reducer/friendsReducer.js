@@ -1,4 +1,16 @@
-import { SELECT_FRIEND, SEND_MESSAGE } from '../action/actionTypes';
+import {
+    SELECT_FRIEND,
+    SEND_MESSAGE,
+    ADD_FRIEND,
+    SET_FRIENDS,
+    DELETE_FRIEND,
+    MARK_ONLINE_FRIEND,
+} from '../action/actionTypes';
+
+const GENERAL = {
+    name: 'General',
+    messages: [],
+};
 
 const defaultState = {
     byId: {
@@ -30,6 +42,45 @@ function friendsReducer(state = defaultState, action) {
                 ...state,
                 selectedFriend: action.payload,
             };
+        case ADD_FRIEND:
+            return {
+                ...state,
+                byId: {
+                    ...state.byId,
+                    [action.payload]: {
+                        name: action.payload,
+                        status: 'ONLINE',
+                        messages: [],
+                    },
+                },
+                friendList: [...state.friendList, action.payload],
+            };
+        case DELETE_FRIEND: {
+            const byIdCopy = { ...state.byId };
+            delete byIdCopy[action.payload];
+            return {
+                ...state,
+                byId: byIdCopy,
+                friendList: state.friendList.fillter((friend) => friend === action.payload),
+                selectedFriend:
+                    state.selectedFriend === action.payload ? GENERAL.name : state.selectedFriend,
+            };
+        }
+        case SET_FRIENDS:
+            return {
+                ...state,
+                byId: {
+                    [GENERAL.name]: GENERAL,
+                    ...action.payload
+                        .map((friend) => ({
+                            name: friend.name,
+                            messages: [],
+                            status: friend.status,
+                        }))
+                        .reduce((acc, friend) => ({ ...acc, [friend.name]: friend }), {}),
+                },
+                friendList: [GENERAL.name, ...action.payload.map((friend) => friend.name)],
+            };
         case SEND_MESSAGE:
             return {
                 ...state,
@@ -41,6 +92,17 @@ function friendsReducer(state = defaultState, action) {
                             action.payload.id,
                             ...state.byId[action.payload.receiver].messages,
                         ],
+                    },
+                },
+            };
+        case MARK_ONLINE_FRIEND:
+            return {
+                ...state,
+                byId: {
+                    ...state.byId,
+                    [action.payload.nick]: {
+                        ...state.byId[action.payload.nick],
+                        status: action.payload.status,
                     },
                 },
             };
