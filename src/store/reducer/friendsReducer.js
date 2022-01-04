@@ -86,11 +86,11 @@ function friendsReducer(state = defaultState, action) {
                 ...state,
                 byId: {
                     ...state.byId,
-                    [action.payload.receiver]: {
-                        ...state.byId[action.payload.receiver],
+                    [action.payload.conversation]: {
+                        ...state.byId[action.payload.conversation],
                         messages: [
                             action.payload.id,
-                            ...state.byId[action.payload.receiver].messages,
+                            ...state.byId[action.payload.conversation].messages,
                         ],
                     },
                 },

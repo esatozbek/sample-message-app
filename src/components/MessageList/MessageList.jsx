@@ -22,7 +22,7 @@ function MessageList() {
     const { nickname } = useSelector((state) => state.me);
     const dispatch = useDispatch();
     const socket = initSocket();
-
+    console.log('selectedFriend', selectedFriend);
     const onMessageChange = useCallback(
         (e) => {
             if (writingTimeoutId) {
@@ -47,15 +47,22 @@ function MessageList() {
             clearTimeout(writingTimeoutId);
             socket.emit('endWriting');
         }
-        dispatch(sendMessage(nickname, selectedFriend, message));
-        socket.emit('sendMessage', JSON.stringify(sendMessage(nickname, selectedFriend, message)));
+        dispatch(sendMessage(selectedFriend, nickname, selectedFriend, message));
+        if (selectedFriend === 'General') {
+            socket.emit('sendMessage', message);
+        } else {
+            socket.emit('sendPrivateMessage', selectedFriend, message);
+        }
         setMessage('');
     }, [message, dispatch, nickname, selectedFriend, socket]);
 
     useEffect(() => {
-        socket.on('receiveMessage', (evt) => {
-            const event = JSON.parse(evt);
-            dispatch(event);
+        socket.on('message', (sender, receiver, message) => {
+            dispatch(sendMessage('General', sender, receiver, message));
+        });
+
+        socket.on('privateMessage', (sender, receiver, message) => {
+            dispatch(sendMessage(sender, sender, receiver, message));
         });
 
         socket.on('startedWriting', (nickname) => {
@@ -65,7 +72,12 @@ function MessageList() {
         socket.on('endWriting', () => {
             setWriteStatus('');
         });
-    }, [dispatch, socket]);
+
+        return () => {
+            console.log('socket listeners removed');
+            socket.removeAllListeners();
+        };
+    }, [dispatch, nickname, selectedFriend, socket]);
 
     if (selectedFriend === BLANK_USER_ID) {
         return <div className={styles.container}>Select a friend from left side</div>;

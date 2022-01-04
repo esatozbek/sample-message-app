@@ -23,7 +23,15 @@ function FriendList() {
         });
 
         socket.on('newUserConnected', (nick) => {
-            dispatch(sendMessage(null, 'General', `${nick} has joined the chat!`, 'NOTIFICATION'));
+            dispatch(
+                sendMessage(
+                    'General',
+                    null,
+                    'General',
+                    `${nick} has joined the chat!`,
+                    'NOTIFICATION'
+                )
+            );
             dispatch(addFriend(nick));
         });
 
@@ -35,6 +43,7 @@ function FriendList() {
             dispatch(markOnlineFriend({ nick, status: 'OFFLINE' }));
             dispatch(
                 sendMessage(
+                    'General',
                     null,
                     'General',
                     `${nick} has disconnected from the chat!`,
