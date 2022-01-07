@@ -1,6 +1,5 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import initSocket from '../../socket';
 import FriendListItem from './views/FriendListItem/FriendListItem';
 import {
     selectFriend,
@@ -9,6 +8,8 @@ import {
     setWriting,
 } from '../../store/action/friendActions';
 import { sendMessage } from '../../store/action/messageActions';
+import useSocketEvent from '../../hooks/useSocketEvent';
+
 import styles from './FriendList.module.css';
 
 let writingTimeoutId;
@@ -16,10 +17,17 @@ let writingTimeoutId;
 function FriendList() {
     const { byId: friendsById, friendList } = useSelector((state) => state.friends);
     const dispatch = useDispatch();
-    const socket = initSocket();
 
-    useEffect(() => {
-        socket.on('newUserConnected', (nick) => {
+    const onSelectFriend = useCallback(
+        (friendName) => {
+            dispatch(selectFriend(friendName));
+        },
+        [dispatch]
+    );
+
+    useSocketEvent(
+        'newUserConnected',
+        (nick) => {
             dispatch(
                 sendMessage(
                     'General',
@@ -30,13 +38,21 @@ function FriendList() {
                 )
             );
             dispatch(addFriend(nick));
-        });
+        },
+        [dispatch]
+    );
 
-        socket.on('onlineUser', (nick) => {
+    useSocketEvent(
+        'onlineUser',
+        (nick) => {
             dispatch(markOnlineFriend({ nick, status: 'ONLINE' }));
-        });
+        },
+        [dispatch]
+    );
 
-        socket.on('userDisconnect', (nick) => {
+    useSocketEvent(
+        'userDisconnect',
+        (nick) => {
             dispatch(markOnlineFriend({ nick, status: 'OFFLINE' }));
             dispatch(
                 sendMessage(
@@ -47,9 +63,13 @@ function FriendList() {
                     'NOTIFICATION'
                 )
             );
-        });
+        },
+        [dispatch]
+    );
 
-        socket.on('startedWriting', (channel, nickname) => {
+    useSocketEvent(
+        'startedWriting',
+        (channel, nickname) => {
             if (writingTimeoutId) {
                 clearTimeout(writingTimeoutId);
             }
@@ -58,20 +78,8 @@ function FriendList() {
             writingTimeoutId = setTimeout(() => {
                 dispatch(setWriting({ nickname, channel, isWriting: false }));
             }, 1000);
-        });
-
-        return () => {
-            socket.off('newUserConnected');
-            socket.off('onlineUser');
-            socket.off('userDisconnect');
-        };
-    }, [dispatch, socket]);
-
-    const onSelectFriend = useCallback(
-        (friendName) => {
-            dispatch(selectFriend(friendName));
         },
-        [dispatch]
+        []
     );
 
     return (

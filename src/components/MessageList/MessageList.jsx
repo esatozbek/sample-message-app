@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import MessageListItem from './views/MessageListItem/MessageListItem';
 import Button from '../../components/Button/Button';
@@ -6,6 +6,8 @@ import TextInput from '../TextInput/TextInput';
 import { sendMessage } from '../../store/action/messageActions';
 import { BLANK_USER_ID } from '../../constants';
 import initSocket from '../../socket';
+import useSocketEvent from '../../hooks/useSocketEvent';
+
 import styles from './MessageList.module.css';
 
 function NotificationListItem({ content }) {
@@ -41,22 +43,6 @@ function MessageList() {
         setMessage('');
     }, [message, dispatch, nickname, selectedFriend, socket]);
 
-    useEffect(() => {
-        socket.on('message', (sender, receiver, message) => {
-            dispatch(sendMessage('General', sender, receiver, message));
-        });
-
-        socket.on('privateMessage', (sender, receiver, message) => {
-            dispatch(sendMessage(sender, sender, receiver, message));
-        });
-
-        return () => {
-            socket.off('message');
-            socket.off('privateMessage');
-            socket.off('startedWriting');
-        };
-    }, [dispatch, nickname, selectedFriend, socket]);
-
     const renderWritingStatus = useCallback(() => {
         const writingFriends = Object.keys(friendsById[selectedFriend].writingFriends).filter(
             (friend) => friendsById[selectedFriend].writingFriends[friend]
@@ -66,6 +52,22 @@ function MessageList() {
         }
         return writingFriends.join(', ') + ' writing...';
     }, [friendsById, selectedFriend]);
+
+    useSocketEvent(
+        'message',
+        (sender, receiver, message) => {
+            dispatch(sendMessage('General', sender, receiver, message));
+        },
+        []
+    );
+
+    useSocketEvent(
+        'privateMessage',
+        (sender, receiver, message) => {
+            dispatch(sendMessage(sender, sender, receiver, message));
+        },
+        []
+    );
 
     if (selectedFriend === BLANK_USER_ID) {
         return <div className={styles.container}>Select a friend from left side</div>;
