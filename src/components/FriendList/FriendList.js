@@ -5,18 +5,19 @@ import FriendListItem from './views/FriendListItem/FriendListItem';
 import {
     selectFriend,
     addFriend,
-    setFriends,
     markOnlineFriend,
     setWriting,
 } from '../../store/action/friendActions';
 import { sendMessage } from '../../store/action/messageActions';
 import styles from './FriendList.module.css';
 
+let writingTimeoutId;
+
 function FriendList() {
     const { byId: friendsById, friendList } = useSelector((state) => state.friends);
     const dispatch = useDispatch();
     const socket = initSocket();
-    console.log('FriendList rendered ' + socket.connected);
+
     useEffect(() => {
         socket.on('newUserConnected', (nick) => {
             dispatch(
@@ -32,12 +33,10 @@ function FriendList() {
         });
 
         socket.on('onlineUser', (nick) => {
-            console.log('onlineUser');
             dispatch(markOnlineFriend({ nick, status: 'ONLINE' }));
         });
 
         socket.on('userDisconnect', (nick) => {
-            console.log('userDisconnect');
             dispatch(markOnlineFriend({ nick, status: 'OFFLINE' }));
             dispatch(
                 sendMessage(
@@ -50,8 +49,18 @@ function FriendList() {
             );
         });
 
+        socket.on('startedWriting', (channel, nickname) => {
+            if (writingTimeoutId) {
+                clearTimeout(writingTimeoutId);
+            }
+            dispatch(setWriting({ nickname, channel, isWriting: true }));
+
+            writingTimeoutId = setTimeout(() => {
+                dispatch(setWriting({ nickname, channel, isWriting: false }));
+            }, 1000);
+        });
+
         return () => {
-            // console.log('all listeners removed');
             socket.off('newUserConnected');
             socket.off('onlineUser');
             socket.off('userDisconnect');

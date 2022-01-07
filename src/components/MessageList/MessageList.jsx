@@ -4,7 +4,6 @@ import MessageListItem from './views/MessageListItem/MessageListItem';
 import Button from '../../components/Button/Button';
 import TextInput from '../TextInput/TextInput';
 import { sendMessage } from '../../store/action/messageActions';
-import { setWriting } from '../../store/action/friendActions';
 import { BLANK_USER_ID } from '../../constants';
 import initSocket from '../../socket';
 import styles from './MessageList.module.css';
@@ -12,8 +11,6 @@ import styles from './MessageList.module.css';
 function NotificationListItem({ content }) {
     return <div>{content}</div>;
 }
-
-let writingTimeoutId;
 
 function MessageList() {
     const [message, setMessage] = useState('');
@@ -35,10 +32,6 @@ function MessageList() {
         if (message === '') {
             return;
         }
-        if (writingTimeoutId) {
-            clearTimeout(writingTimeoutId);
-            socket.emit('endWriting');
-        }
         dispatch(sendMessage(selectedFriend, nickname, selectedFriend, message));
         if (selectedFriend === 'General') {
             socket.emit('sendMessage', message);
@@ -55,18 +48,6 @@ function MessageList() {
 
         socket.on('privateMessage', (sender, receiver, message) => {
             dispatch(sendMessage(sender, sender, receiver, message));
-        });
-
-        socket.on('startedWriting', (channel, nickname) => {
-            if (writingTimeoutId) {
-                clearTimeout(writingTimeoutId);
-            }
-            console.log('startedWriting', channel, nickname);
-            dispatch(setWriting({ nickname, channel, isWriting: true }));
-
-            writingTimeoutId = setTimeout(() => {
-                dispatch(setWriting({ nickname, channel, isWriting: false }));
-            }, 1000);
         });
 
         return () => {

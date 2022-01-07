@@ -14,7 +14,6 @@ function Welcome() {
     const enterChat = useCallback(() => {
         const socket = initSocket();
         socket.emit('enterChat', inputRef.current.value, (friendList) => {
-            console.log(friendList);
             dispatch(setFriends(friendList));
         });
         dispatch(locateMainScreen());
