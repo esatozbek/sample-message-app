@@ -4,6 +4,7 @@ import MessageListItem from './views/MessageListItem/MessageListItem';
 import Button from '../../components/Button/Button';
 import TextInput from '../TextInput/TextInput';
 import { sendMessage } from '../../store/action/messageActions';
+import { setWriting } from '../../store/action/friendActions';
 import { BLANK_USER_ID } from '../../constants';
 import initSocket from '../../socket';
 import styles from './MessageList.module.css';
@@ -16,27 +17,18 @@ let writingTimeoutId;
 
 function MessageList() {
     const [message, setMessage] = useState('');
-    const [writeStatus, setWriteStatus] = useState('');
     const messagesById = useSelector((state) => state.messages.byId);
     const { selectedFriend, byId: friendsById } = useSelector((state) => state.friends);
     const { nickname } = useSelector((state) => state.me);
     const dispatch = useDispatch();
     const socket = initSocket();
-    console.log('selectedFriend', selectedFriend);
+
     const onMessageChange = useCallback(
         (e) => {
-            if (writingTimeoutId) {
-                clearTimeout(writingTimeoutId);
-            }
-
             setMessage(e.target.value);
-            socket.emit('startedWriting');
-
-            writingTimeoutId = setTimeout(() => {
-                socket.emit('endWriting');
-            }, 1000);
+            socket.emit('startedWriting', selectedFriend);
         },
-        [setMessage, socket]
+        [socket, selectedFriend]
     );
 
     const handleSendMessage = useCallback(() => {
@@ -65,19 +57,34 @@ function MessageList() {
             dispatch(sendMessage(sender, sender, receiver, message));
         });
 
-        socket.on('startedWriting', (nickname) => {
-            setWriteStatus(`${nickname} is writing...`);
-        });
+        socket.on('startedWriting', (channel, nickname) => {
+            if (writingTimeoutId) {
+                clearTimeout(writingTimeoutId);
+            }
+            console.log('startedWriting', channel, nickname);
+            dispatch(setWriting({ nickname, channel, isWriting: true }));
 
-        socket.on('endWriting', () => {
-            setWriteStatus('');
+            writingTimeoutId = setTimeout(() => {
+                dispatch(setWriting({ nickname, channel, isWriting: false }));
+            }, 1000);
         });
 
         return () => {
-            console.log('socket listeners removed');
-            socket.removeAllListeners();
+            socket.off('message');
+            socket.off('privateMessage');
+            socket.off('startedWriting');
         };
     }, [dispatch, nickname, selectedFriend, socket]);
+
+    const renderWritingStatus = useCallback(() => {
+        const writingFriends = Object.keys(friendsById[selectedFriend].writingFriends).filter(
+            (friend) => friendsById[selectedFriend].writingFriends[friend]
+        );
+        if (writingFriends.length === 0) {
+            return ' ';
+        }
+        return writingFriends.join(', ') + ' writing...';
+    }, [friendsById, selectedFriend]);
 
     if (selectedFriend === BLANK_USER_ID) {
         return <div className={styles.container}>Select a friend from left side</div>;
@@ -110,7 +117,7 @@ function MessageList() {
                 />
                 <Button text="Send Message" onClick={handleSendMessage} />
             </div>
-            <div>{writeStatus}</div>
+            <div>{renderWritingStatus()}</div>
         </div>
     );
 }

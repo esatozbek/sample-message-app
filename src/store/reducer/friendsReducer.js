@@ -5,11 +5,13 @@ import {
     SET_FRIENDS,
     DELETE_FRIEND,
     MARK_ONLINE_FRIEND,
+    SET_WRITING,
 } from '../action/actionTypes';
 
 const GENERAL = {
     name: 'General',
     messages: [],
+    writingFriends: {},
 };
 
 const defaultState = {
@@ -40,6 +42,9 @@ function friendsReducer(state = defaultState, action) {
         case SELECT_FRIEND:
             return {
                 ...state,
+                byId: {
+                    ...state.byId,
+                },
                 selectedFriend: action.payload,
             };
         case ADD_FRIEND:
@@ -51,6 +56,7 @@ function friendsReducer(state = defaultState, action) {
                         name: action.payload,
                         status: 'ONLINE',
                         messages: [],
+                        writingFriends: {},
                     },
                 },
                 friendList: [...state.friendList, action.payload],
@@ -76,6 +82,7 @@ function friendsReducer(state = defaultState, action) {
                             name: friend.name,
                             messages: [],
                             status: friend.status,
+                            writingFriends: [],
                         }))
                         .reduce((acc, friend) => ({ ...acc, [friend.name]: friend }), {}),
                 },
@@ -103,6 +110,25 @@ function friendsReducer(state = defaultState, action) {
                     [action.payload.nick]: {
                         ...state.byId[action.payload.nick],
                         status: action.payload.status,
+                    },
+                },
+            };
+        case SET_WRITING:
+            return {
+                ...state,
+                byId: {
+                    ...state.byId,
+                    [action.payload.channel]: {
+                        ...state.byId[action.payload.channel],
+                        writingFriends: action.payload.isWriting
+                            ? {
+                                  ...state.byId[action.payload.channel].writingFriends,
+                                  [action.payload.nickname]: true,
+                              }
+                            : {
+                                  ...state.byId[action.payload.channel].writingFriends,
+                                  [action.payload.nickname]: false,
+                              },
                     },
                 },
             };

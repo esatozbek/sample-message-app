@@ -7,6 +7,7 @@ import {
     addFriend,
     setFriends,
     markOnlineFriend,
+    setWriting,
 } from '../../store/action/friendActions';
 import { sendMessage } from '../../store/action/messageActions';
 import styles from './FriendList.module.css';
@@ -15,13 +16,8 @@ function FriendList() {
     const { byId: friendsById, friendList } = useSelector((state) => state.friends);
     const dispatch = useDispatch();
     const socket = initSocket();
-
+    console.log('FriendList rendered ' + socket.connected);
     useEffect(() => {
-        socket.on('selectFriend', (msg) => {
-            const event = JSON.parse(msg);
-            dispatch(event);
-        });
-
         socket.on('newUserConnected', (nick) => {
             dispatch(
                 sendMessage(
@@ -36,10 +32,12 @@ function FriendList() {
         });
 
         socket.on('onlineUser', (nick) => {
+            console.log('onlineUser');
             dispatch(markOnlineFriend({ nick, status: 'ONLINE' }));
         });
 
         socket.on('userDisconnect', (nick) => {
+            console.log('userDisconnect');
             dispatch(markOnlineFriend({ nick, status: 'OFFLINE' }));
             dispatch(
                 sendMessage(
@@ -52,11 +50,12 @@ function FriendList() {
             );
         });
 
-        socket.on('friendList', (friendListJSON) => {
-            console.log(friendListJSON);
-            const friendList = JSON.parse(friendListJSON);
-            dispatch(setFriends(friendList));
-        });
+        return () => {
+            // console.log('all listeners removed');
+            socket.off('newUserConnected');
+            socket.off('onlineUser');
+            socket.off('userDisconnect');
+        };
     }, [dispatch, socket]);
 
     const onSelectFriend = useCallback(

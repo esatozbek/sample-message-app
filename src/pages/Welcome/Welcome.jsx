@@ -5,6 +5,7 @@ import { locateMainScreen } from '../../store/action/locationActions';
 import TextInput from '../../components/TextInput/TextInput';
 import Button from '../../components/Button/Button';
 import { setNickname } from '../../store/action/meActions';
+import { setFriends } from '../../store/action/friendActions';
 
 function Welcome() {
     const inputRef = useRef(null);
@@ -12,7 +13,10 @@ function Welcome() {
 
     const enterChat = useCallback(() => {
         const socket = initSocket();
-        socket.emit('enterChat', inputRef.current.value);
+        socket.emit('enterChat', inputRef.current.value, (friendList) => {
+            console.log(friendList);
+            dispatch(setFriends(friendList));
+        });
         dispatch(locateMainScreen());
         dispatch(setNickname(inputRef.current.value));
     }, [dispatch]);

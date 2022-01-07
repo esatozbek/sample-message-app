@@ -4,6 +4,7 @@ import {
     SET_FRIENDS,
     DELETE_FRIEND,
     MARK_ONLINE_FRIEND,
+    SET_WRITING,
 } from './actionTypes';
 
 export function selectFriend(friendName) {
@@ -38,5 +39,16 @@ export function markOnlineFriend({ nick, status }) {
     return {
         type: MARK_ONLINE_FRIEND,
         payload: { nick, status },
+    };
+}
+
+export function setWriting({ channel, nickname, isWriting }) {
+    return {
+        type: SET_WRITING,
+        payload: {
+            channel,
+            nickname,
+            isWriting,
+        },
     };
 }
